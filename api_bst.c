@@ -53,8 +53,60 @@ node_t* get_node (node_t* root, int key){
     }
 }
 
-void remove_node(node_t* root, int key){
+node_t* get_parent (node_t* root, int key){
+    if(root->key == key) return NULL;
+    if(root->left_child->key == key || root->right_child->key == key) return root;
+    else if (root->key < key) get_parent(root->right_child, key);  
+    else if (root->key > key) get_parent(root->left_child, key);
+}
 
+node_t* remove_node(node_t* root, int key){
+    node_t* node = get_node(root, key);
+    if(node->right_child == NULL && node->left_child != NULL){
+        node_t* tmp = node->left_child;
+        node->key = node->left_child->key;
+        node->right_child = node->left_child->right_child;
+        node->left_child = node->left_child->left_child;
+        free(tmp);
+    }
+    else if (node->left_child == NULL && node->right_child != NULL){
+        node_t *tmp = node->right_child;
+        node->key = node->right_child->key;
+        node->left_child = node->right_child->left_child;
+        node->right_child = node->right_child->right_child;
+        free(tmp);
+    }
+    else if(node->left_child == NULL && node->right_child == NULL){
+        node_t* parent = get_parent(root, key);
+        if(parent->left_child->key == key){
+            parent->left_child == NULL;
+            free(node);
+        }
+        else if (parent->right_child->key == key){
+            parent->right_child == NULL;
+            free(node);
+        }
+        else{
+            free(node);
+        }
+    }
+    else{
+        node_t* left_tree = node->left_child;
+        node_t* right_tree = node->right_child;
+        
+        while(right_tree->left_child != NULL)
+            right_tree = right_tree->left_child;
+        
+        right_tree->left_child = left_tree;
+
+        node_t* tmp = node->right_child;
+        
+        node->key = node->right_child->key;
+        node->left_child = node->right_child->left_child;
+        node->right_child = node->right_child->right_child;
+
+        free(tmp);
+    }
 }
 
 void delete_tree(node_t* root){
