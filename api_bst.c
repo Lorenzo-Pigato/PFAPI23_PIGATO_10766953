@@ -54,10 +54,18 @@ node_t* get_node (node_t* root, int key){
 }
 
 node_t* get_parent (node_t* root, int key){
-    if(root->key == key) return NULL;
-    if(root->left_child->key == key || root->right_child->key == key) return root;
-    else if (root->key < key) get_parent(root->right_child, key);  
-    else if (root->key > key) get_parent(root->left_child, key);
+    if(root != NULL){
+        if (root->key == key) return NULL;
+        
+        if (root->left_child != NULL)
+            if (root->left_child->key == key) return root;
+        
+        if (root->right_child != NULL)
+            if (root->right_child->key == key) return root;
+
+        else if (root->key < key) get_parent(root->right_child, key);
+        else if (root->key > key) get_parent(root->left_child, key);
+    }
 }
 
 void remove_node(node_t* root, int key){
@@ -81,15 +89,16 @@ void remove_node(node_t* root, int key){
         }
         else if (node->left_child == NULL && node->right_child == NULL)
         {
-            node_t *parent = get_parent(root, key);
+            node_t* parent = get_parent(root, key);
+            printf("+ Parent node: %p key: %d\n", parent, parent->key);
             if (parent->left_child->key == key)
             {
-                parent->left_child == NULL;
+                parent->left_child = NULL;
                 free(node);
             }
             else if (parent->right_child->key == key)
             {
-                parent->right_child == NULL;
+                parent->right_child = NULL;
                 free(node);
             }
             else
