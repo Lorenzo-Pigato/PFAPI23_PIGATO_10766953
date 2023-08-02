@@ -252,11 +252,11 @@ void remove_node (node* root, int key){                         // MAYBE OPTIMIZ
         return;
     }
 
-    // Deleting a central node - next node is not target's child and neither an ancestor [2]
+    // Deleting a central node
 
     node next = next_node(target, key);
 
-    if (target->right_child != next)                            //[2.1]
+    if (target->right_child != next)                            // next node is not target's child and neither an ancestor [2]
     {
         next->left_child = target->left_child;                  // Acquiring target's left child, if any
         target->left_child->parent = next;
@@ -265,19 +265,6 @@ void remove_node (node* root, int key){                         // MAYBE OPTIMIZ
             next->parent->left_child = NULL;
         else
             next->parent->right_child = NULL;
-        
-        next->parent = target->parent;                          // Acquiring target's parent, if any
-        if(target->parent != NULL){
-            if(target->parent->left_child == target)            // Changing parent's child pointer to new node
-                target->parent->left_child = next;
-            else
-                target->parent->right_child = next;
-        }
-        else {                                                  // Must change root reference [2.2]
-            *root = next;
-            (*root)->parent = NULL;
-            printf("+ New root key: %d\n", (*root)->key);
-        }
 
         node tmp = next;                                        // OPTIMIZABLE -> use next
 
@@ -287,38 +274,30 @@ void remove_node (node* root, int key){                         // MAYBE OPTIMIZ
         tmp->right_child = target->right_child;
         target->right_child->parent = next;
     }
+
     else if (next == NULL)                                      // No next element found (left subtree only) [3]
     {
         next = target->left_child;
-        
-        next->parent = target->parent;                          // Acquiring target's parent, if any
-        if(target->parent != NULL){
-            if(target->parent->left_child == target)            // Changing parent's child pointer to new node
-                target->parent->left_child = next;
-            else
-                target->parent->right_child = next;
-        }
-        else {                                                  // Must change root reference
-            *root = next;
-            (*root)->parent = NULL;
-            printf("+ New root key: %d\n", (*root)->key);
-        }
     }
-    else if(next == target->right_child){                       // Next node has no left tree -> Next element is target's right child [4]
-        next->left_child = target->left_child;                  // Acquiring target's left subtree, if any
 
-        next->parent = target->parent;
-        if(target->parent != NULL){
-            if(target->parent->left_child == target)            // Changing parent's child pointer to new node
-                target->parent->left_child = next;
-            else
-                target->parent->right_child = next;
-        }
-        else {                                                  // Must change root reference
-            *root = next;
-            (*root)->parent = NULL;
-            printf("+ New root key: %d\n", (*root)->key);
-        }
+    else if (next == target->right_child)                       // Next node has no left tree -> Next element is target's right child [4]
+    {                       
+        next->left_child = target->left_child;                  // Acquiring target's left subtree, if any
+    }
+
+    next->parent = target->parent;                              // Acquiring target's parent, if any
+    if (target->parent != NULL)
+    {
+        if (target->parent->left_child == target)               // Changing parent's child pointer to new node
+            target->parent->left_child = next;
+        else
+            target->parent->right_child = next;
+    }
+    else
+    {                                                           // Must change root reference
+        *root = next;
+        (*root)->parent = NULL;
+        printf("+ New root key: %d\n", (*root)->key);
     }
 
     printf("+ Target Node deleted: %d\n+ Substituted with node: %d\n", target->key, next->key);
