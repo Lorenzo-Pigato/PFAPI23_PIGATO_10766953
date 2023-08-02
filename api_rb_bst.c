@@ -108,11 +108,9 @@ node next_node (node root, int key){                            // Smaller of ri
 
         while (target->left_child != NULL)
             target = target->left_child;
-        printf("4\n");
     }
     else if (target->parent != NULL && target != root)          // Target parent is root
     {
-        printf("5\n");
         if (target->parent->key > key)
         {
             target = target->parent;
@@ -226,8 +224,6 @@ void insert_node (node* root, int key){
 
 void remove_node (node* root, int key){                         // MAYBE OPTIMIZABLE WHEN TREE IS  R&B
     node target = find_node(*root, key);
-
-    printf("+ Target left child: %p\n+ Target right child: %p\n", target->left_child, target->right_child);
 
     if (target == NULL)                                         // Target node not found
     {
@@ -376,12 +372,12 @@ int main(void)
     node root = NULL;                                           // Inizialize NULL root pointer
 
     insert_node(&root, 15);
-    insert_node(&root, 11);
-    insert_node(&root, 6);
     insert_node(&root, 13);
-    insert_node(&root, 12);
+    insert_node(&root, 6);
+    insert_node(&root, 14);
     insert_node(&root, 5);
     insert_node(&root, 9);
+    insert_node(&root, 12);
     insert_node(&root, 7);
     insert_node(&root, 11);
     insert_node(&root, 8);
