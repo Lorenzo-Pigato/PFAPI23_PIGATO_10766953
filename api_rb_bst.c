@@ -161,6 +161,56 @@ void check_tree(node root)
     // right-left sit -> right rotate parent -> left rotate grand parent
 }
 
+void rotate_left(node parent, node child){
+
+    if(parent->right_child != child) return;
+    
+    child->parent = parent->parent;                             // Child parent is now grandparent
+    
+    if (child->parent != NULL)
+    {
+        if (parent->parent->left_child == parent)               // Update pointer on grandparent (if any)
+            parent->parent->left_child = child;                 // Parent is grandparent's left child
+        else
+            parent->parent->right_child = child;                // Parent is grandparent's right child
+    }
+    
+    parent->right_child = child->left_child;                    // Parent's right child is now child's left tree
+
+    if (child->left_child != NULL)
+        child->left_child->parent = parent;                     // Update child's left tree parent
+
+    child->left_child = parent;
+    parent->parent = child;
+
+    printf("+ Nodes left-rotated\n\n");
+}
+
+void rotate_right (node parent, node child){
+
+    if(parent->left_child != child) return;
+    
+    child->parent = parent->parent;                             // Child parent is now grandparent
+    
+    if (child->parent != NULL)
+    {
+        if (parent->parent->left_child == parent)               // Update pointer on grandparent (if any)
+            parent->parent->left_child = child;
+        else
+            parent->parent->right_child = child;
+    }
+    
+    parent->left_child = child->right_child;                    // Parent's left child is now child's right subtree tree
+
+    if (child->right_child != NULL)
+        child->right_child->parent = parent;                    // Update child's right tree parent
+
+    child->right_child = parent;
+    parent->parent = child;
+
+    printf("+ Nodes right-rotated\n\n");
+}
+
 void insert_node (node* root, int key){
     //Every new node inserted starts as red except for root
     
@@ -182,6 +232,7 @@ void insert_node (node* root, int key){
 
     else
     {
+        node check = (*root);
         node parent = NULL;
         node* tmp;
         tmp = root;
@@ -219,15 +270,16 @@ void insert_node (node* root, int key){
         printf("+ Node inserted correctly\n+ Node memory address: %p\n", (void *)(tmp));
         if(parent != NULL) printf ("+ Parent key: %d\n\n", parent->key);
 
+        check_tree(check);
     }
 }
 
-void remove_node (node* root, int key){                         // MAYBE OPTIMIZABLE WHEN TREE IS  R&B
+void remove_node (node* root, int key){                         
     node target = find_node(*root, key);
 
     if (target == NULL)                                         // Target node not found
     {
-        printf("+ Node not removed\n\n");
+        printf("+ Node not found\n\n");
         return;
     }
 
@@ -245,7 +297,7 @@ void remove_node (node* root, int key){                         // MAYBE OPTIMIZ
             }
         }
         
-        if(target->color != red) check_tree(*root);             // Removing a red leaf implies no violation
+        if(target->color != red) check_tree(*root);              // Removing a red leaf implies no violation
         
         free(target);
         
@@ -300,32 +352,12 @@ void remove_node (node* root, int key){                         // MAYBE OPTIMIZ
         printf("+ New root key: %d\n", (*root)->key);
     }
 
-    printf("+ Target Node deleted: %d\n+ Substituted with node: %d\n", target->key, next->key);
-    printf("+ Left child: %p\n+ Right child: %p\n+ Parent key: %d\n\n", next->left_child, next->right_child, next->parent == NULL ? -1 : next->parent->key);
+    printf("+ Target Node deleted\n\n");
 
     free(target);
 
-    //check_tree(root);                                         // Maintain Red and Black structure
+    check_tree(*root);                                          // Maintain Red and Black structure
 }
-
-/*
-list* prev_nodes_in_range (node root, int key, int range){
-
-}
-
-list* next_nodes_in_range(node root, int key, int range){
-    if (root == NULL) return NULL;
-
-    node next = root->right_child;
-
-    while (next->left_child != NULL){
-        
-        next = next->left_child;
-    }
-
-    return next;
-}
-*/
 
 void delete_tree (node root){
     if (root != NULL)
@@ -371,12 +403,6 @@ int main(void)
     insert_node(&root, 19);
     insert_node(&root, 20);
 
-    /*insert_node(&root, 11);
-    insert_node(&root, 17);
-    insert_node(&root, 14);
-    insert_node(&root, 13);
-    insert_node(&root, 15);*/
-
     printf("Instruction list:\n> i - insert\n> r - remove\n> f - find\n> g - graph\n> q - quit\n\n");
 
     while (1)
@@ -410,6 +436,18 @@ int main(void)
             next_node(root, key);
             prev_node(root, key);
             //list lst = get_nodes_in_range(root, key, range);
+            break;
+
+        case 'l':
+            scanf(" %d", &range);
+            printf("\n+ rotating left node: %d and node %d\n", key, range);
+            rotate_left(find_node(root, key), find_node(root, range));
+            break;
+
+        case 'n':
+            scanf(" %d", &range);
+            printf("\n+ rotating left node: %d and node %d\n", key, range);
+            rotate_right(find_node(root, key), find_node(root, range));
             break;
 
         case 'q':
