@@ -24,8 +24,8 @@ typedef struct rb_node {
 
 typedef node_t* node;                                           //Definition of a node as a pointer
 
-const node_t leaf_s = {-1, black, NULL, NULL, NULL};            //Definition of a NULL LEAF
-const node_t* const leaf = &leaf_s; 
+//const node_t leaf_s = {-1, black, NULL, NULL, NULL};            //Definition of a NULL LEAF
+//const node_t* const leaf = &leaf_s; 
 
 typedef struct linked_list {                                    //List of nodes in a range
     node node;
@@ -54,7 +54,7 @@ node find_node (node root, int key){
     }
     else
     {
-        printf("+ Node found\n+ Node address: %p\n\n", (void *)root);
+        printf("+ Node found\n+ Node address: %p\n+ Node color: %s\n\n", (void *)root, root->color == red ? "red" : "black");
         return root;
     }
 }
@@ -139,29 +139,7 @@ node next_node (node root, int key){                            // Smaller of ri
     return target;
 }
 
-void check_tree(node root)
-{
-    // Root has to be black
-    if (root->parent == NULL && root->color == red)
-    {
-        printf("+ Recolored tree's root\n");
-        root->color = black;
-    }
-
-    printf("+ Tree fixed\n\n");
-
-    // Sibling of parent node is RED and parent has NO CHILD-> RECOLORING
-    // RECOLORING inverts colors of PARENT - UNCLE - GRANDPA
-    // Must check if other rotations or recoloring is needed ascending to root
-
-    // Sibling of parent node is BLACK -> ROTATION
-    // left heavy -> right rotation
-    // right heavy -> left rotation
-    // left-right sit -> left rotate parent -> right rotate grand parent
-    // right-left sit -> right rotate parent -> left rotate grand parent
-}
-
-void rotate_left(node parent, node child){
+void rotate_left(node* root, node parent, node child){
 
     if(parent->right_child != child) return;
     
@@ -174,6 +152,8 @@ void rotate_left(node parent, node child){
         else
             parent->parent->right_child = child;                // Parent is grandparent's right child
     }
+    else
+        *root = child;
     
     parent->right_child = child->left_child;                    // Parent's right child is now child's left tree
 
@@ -186,7 +166,7 @@ void rotate_left(node parent, node child){
     printf("+ Nodes left-rotated\n\n");
 }
 
-void rotate_right (node parent, node child){
+void rotate_right (node* root, node parent, node child){
 
     if(parent->left_child != child) return;
     
@@ -199,7 +179,9 @@ void rotate_right (node parent, node child){
         else
             parent->parent->right_child = child;
     }
-    
+    else
+        *root = child;
+
     parent->left_child = child->right_child;                    // Parent's left child is now child's right subtree tree
 
     if (child->right_child != NULL)
@@ -211,9 +193,119 @@ void rotate_right (node parent, node child){
     printf("+ Nodes right-rotated\n\n");
 }
 
+void check_tree(node* root, node target)
+{
+
+    printf("+ Started violations checking\n");
+    node parent, grandparent, uncle;
+
+    if ((*root == NULL || target == NULL))                      // Return if tree is not defined or target is not defined
+    { 
+        printf("+ Tree not found\n\n");
+        return;        
+    }
+
+
+    while (target->parent != NULL)                              // target is root
+    {
+        parent = target->parent;
+        grandparent = parent->parent;                           // Can be NULL if parent is root
+
+        if (grandparent == NULL || parent->color == black)                                 
+        {
+            printf("+ Tree fixed\n\n");
+            return;
+        }
+
+        // Case 1: target's parent is grandparent's left child
+
+        if (parent == grandparent->left_child)
+        {
+            uncle = grandparent->right_child;
+
+            // Uncle is a red node
+            
+            if (uncle != NULL && uncle->color == red)
+            {
+                parent->color = black;                          // Push blackness down from grandparent
+                uncle->color = black;                           
+                grandparent->color = red;                       // Grandparent becomes red
+                target = grandparent;                           // New violations can now occour on grandparent because of color changing
+            }
+
+            // Uncle is black or is missing - Left Heavy
+
+            else if(parent->color == red && (uncle == NULL || uncle->color == black))
+            {
+                if (target == parent->right_child)              // If target is parent's right child, an extra left rotation is needed - "left list"
+                {
+                    rotate_left(root, parent, target);          // After this rotation, there will be a "left list" - [B R R]
+                    parent = target;                            // Parent is now become target (node were inverted)
+                }
+                
+                rotate_right(root, grandparent, parent);        // This rotation is to rebalance the left list
+                
+                parent->color = black;
+                grandparent->color = red;
+
+                target = grandparent;
+            }
+        }
+
+        // Target's parent is grandparent's right child
+        
+        else
+        {
+            uncle = grandparent->left_child;
+
+            // Uncle is red
+
+            if (uncle != NULL && uncle->color == red)           // Only recoloring is needed
+            {
+                parent->color = black;                          // Push blackness down from grandparent
+                uncle->color = black;
+                grandparent->color = red;
+                target = grandparent;                           // New violations can occour on grandparent after recoloring
+            }
+            
+            // Uncle is black or missing - Right Heavy
+
+            else if (parent->color == red && (uncle == NULL || uncle->color == black))
+            {
+                if (target == parent->left_child)               // Extra right rotation needed to create a "right list"
+                {
+                    rotate_right(root, parent, target);
+                    parent = target;
+                }
+                
+                rotate_left(root, grandparent, parent);
+                
+                parent->color = black;
+                grandparent->color = red;
+
+                target = grandparent;
+            }
+        }
+    }
+
+    (*root)->color = black; // Il nodo radice deve essere sempre nero
+}
+
+    // Uncle node is RED and parent has NO CHILD-> RECOLORING
+    // RECOLORING inverts colors of PARENT - UNCLE - GRANDPA
+    // Must check if other rotations or recoloring is needed ascending to root
+
+    // Uncle node is BLACK -> ROTATION
+    // left heavy -> right rotation
+    // right heavy -> left rotation
+    // left-right sit -> left rotate parent -> right rotate grand parent
+    // right-left sit -> right rotate parent -> left rotate grand parent
+
 void insert_node (node* root, int key){
     //Every new node inserted starts as red except for root
     
+    printf("+ Inserting node: %d\n", key);
+
     if (*root == NULL)
     { 
         node new_node = (node_t *)malloc(sizeof(node_t));
@@ -232,7 +324,6 @@ void insert_node (node* root, int key){
 
     else
     {
-        node check = (*root);
         node parent = NULL;
         node* tmp;
         tmp = root;
@@ -270,7 +361,7 @@ void insert_node (node* root, int key){
         printf("+ Node inserted correctly\n+ Node memory address: %p\n", (void *)(tmp));
         if(parent != NULL) printf ("+ Parent key: %d\n\n", parent->key);
 
-        check_tree(check);
+        check_tree(root, *tmp); 
     }
 }
 
@@ -297,7 +388,7 @@ void remove_node (node* root, int key){
             }
         }
         
-        if(target->color != red) check_tree(*root);              // Removing a red leaf implies no violation
+        if(target->color != red) check_tree(root, (target->parent));      // Removing a red leaf implies no violation
         
         free(target);
         
@@ -356,7 +447,7 @@ void remove_node (node* root, int key){
 
     free(target);
 
-    check_tree(*root);                                          // Maintain Red and Black structure
+    check_tree(root, next);                                          // Maintain Red and Black structure
 }
 
 void delete_tree (node root){
@@ -373,9 +464,37 @@ void delete_tree (node root){
     }
 }
 
+void print_level_order(node root)                               // Remove before flight - Utility
+{
+    if (root == NULL)
+    {
+        printf("+ Empty tree\n\n");
+        return;
+    }
+
+    node queue[1000];
+    int front = 0, rear = 0;
+    queue[rear++] = root;
+
+    while (front < rear)
+    {
+        node current = queue[front++];
+        printf("Key: %d Color: %s Parent: %d\n", current->key, current->color == red ? "red" : "black", current->parent != NULL ? current->parent->key : -1);
+
+        
+        if (current->left_child)
+            queue[rear++] = current->left_child;
+        if (current->right_child)
+            queue[rear++] = current->right_child;
+    }
+
+    printf("\n");
+}
+
 /////////////////////////////////////////////////////
 
-int main(void)
+    int
+    main(void)
 {
     char inst;                                                  // Char containing instruction to execute
     int key;  
@@ -409,7 +528,7 @@ int main(void)
     {
         printf("> "); 
         scanf(" %c", &inst);
-        if (inst != 'q')
+        if (inst != 'q' && inst != 'p')
             scanf(" %d", &key);
 
         switch (inst)
@@ -438,16 +557,9 @@ int main(void)
             //list lst = get_nodes_in_range(root, key, range);
             break;
 
-        case 'l':
-            scanf(" %d", &range);
-            printf("\n+ rotating left node: %d and node %d\n", key, range);
-            rotate_left(find_node(root, key), find_node(root, range));
-            break;
-
-        case 'n':
-            scanf(" %d", &range);
-            printf("\n+ rotating left node: %d and node %d\n", key, range);
-            rotate_right(find_node(root, key), find_node(root, range));
+        case 'p':
+            print_level_order(root);
+            // list lst = get_nodes_in_range(root, key, range);
             break;
 
         case 'q':
