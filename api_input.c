@@ -1,137 +1,94 @@
-// Code to read user input
-
 #include <stdio.h>
 
-int main()
-{
-    while (1)
-    {
-        char istruzione[20];     // per contenere la stringa di istruzione
-        int num_arg;             // per contenere il numero di argomenti
-        char argomenti[100][20]; // per contenere gli argomenti
+#define BUFF_SIZE   20
+#define MAX_SIZE    514                                     // Station_id   Car_Number  512 cars
 
-        // Leggi l'input dall'utente
-        int result = scanf("%s %d", istruzione, &num_arg);
-
-        // Verifica se il file di input è terminato o se c'è stato un errore
-        if (result == EOF)
-        {
-            break; // Esci dal ciclo se il file di input è terminato
-        }
-        else if (result != 2)
-        {
-            printf("Errore: input non valido.\n");
-            return 1;
-        }
-
-        // Verifica se la stringa di istruzione è valida
-        if (strcmp(istruzione, "aggiungi-stazione") != 0 &&
-            strcmp(istruzione, "aggiungi-auto") != 0 &&
-            strcmp(istruzione, "pianifica-percorso") != 0 &&
-            strcmp(istruzione, "rottama-auto") != 0 &&
-            strcmp(istruzione, "demolisci-stazione") != 0)
-        {
-            printf("Errore: istruzione non valida.\n");
-            return 1;
-        }
-
-        // Verifica se il numero di argomenti è valido
-        if (num_arg < 0 || num_arg > 100)
-        {
-            printf("Errore: numero di argomenti non valido.\n");
-            return 1;
-        }
-
-        // Leggi gli argomenti
-        for (int i = 0; i < num_arg; i++)
-        {
-            scanf("%s", argomenti[i]);
-        }
-
-        // Esegui l'azione corrispondente all'istruzione con gli argomenti
-        if (strcmp(istruzione, "aggiungi-stazione") == 0)
-        {
-            if (num_arg == 2)
-            {
-                // Esegui l'azione per aggiungere una stazione con due argomenti
-            }
-            else
-            {
-                printf("Istruzione non eseguita: numero di argomenti non corretto.\n");
-            }
-        }
-        else if (strcmp(istruzione, "aggiungi-auto") == 0)
-        {
-            if (num_arg == 3)
-            {
-                // Esegui l'azione per aggiungere un'auto con tre argomenti
-            }
-            else
-            {
-                printf("Istruzione non eseguita: numero di argomenti non corretto.\n");
-            }
-        }
-        else if (strcmp(istruzione, "pianifica-percorso") == 0)
-        {
-            if (num_arg == 1)
-            {
-                // Esegui l'azione per pianificare un percorso con un argomento
-            }
-            else
-            {
-                printf("Istruzione non eseguita: numero di argomenti non corretto.\n");
-            }
-        }
-        // Continua con gli altri casi per le altre istruzioni...
-    }
-
+int find_station (void){
     return 0;
 }
 
-#include <stdio.h>
+int add_car (void){
+    return 0;
+}
 
-int main(void)
+int find_car(void){
+    return 1;
+}
+
+int main()
 {
-    char buffer [18];
-    int base_arg = 0;
-    int input_arg [512];
+    char buffer [BUFF_SIZE];
+    int input [MAX_SIZE];
 
-    while (scanf("%s", buffer) == 1){                       // Data collected, no EOF
+    while (scanf(" %s", buffer) == 1 && !feof(stdin)){       // Data collected, no EOF
         switch (buffer[0]) {
             case 'a':
                 
                 int i = 0;
                 while (buffer[i] != '-') i++;
                 
-                if (buffer[i+1] == 's'){                    // Add a station
-                    if(scanf("%d", &base_arg))              // Get number of expected args        
-                        
-                            if(!scanf("%d", &input_arg[i])){
-                                printf("Non-aggiunta\n");
-                                break;
-                            }
-                        }
-                        
+                if (buffer[i+1] == 's') {                  // Add a station
                     
-                };
-                else if (buffer[i+1] == 'a') add_car(); 
+                    if(scanf(" %d %d", &input[0], &input[1])){          
+                        for (i = 0; i < input[1]; i++)
+                            if (!scanf("%d", &input[i+2])) return 1;
+                    }
+                    else return 1;
+                    
+                    if (find_station()) 
+                        printf("non aggiunta\n");
+                    else 
+                        printf("aggiunta\n");
+                
+                }
+                    
+                else if (buffer[i+1] == 'a') {
+                    if (!scanf(" %d %d", &input[0], &input[1])) 
+                        return 1;
+
+                    if (find_station()){
+                        if(add_car())
+                            printf("aggiunta\n");
+                    }
+                    else
+                        printf("non aggiunta\n");
+                }
                 break;
 
-            case 'd': 
-                "demolita\n"
+            case 'd':
+                if (scanf(" %d", &input[0])){
+                    if (find_station())
+                        printf("demolita\n");
+                    
+                    else
+                        printf("non demolita\n");
+                }
                 break;
 
-            case 'r': 
-                "rottamata\n"
+            case 'r':
+                if (scanf(" %d %d", &input[0], &input[1])){
+                    if (find_station() && find_car())
+                            printf("rottamata\n");
+                        
+                    else
+                        printf("non rottamata\n");
+                }
                 break;
 
             case 'p':
-                "pianifica\n"
+                if (scanf(" %d %d", &input[0], &input[1]))
+                {
+                    if (find_station() && find_station())
+                        printf("pianifica\n");
+
+                    else
+                        printf("non pianifica\n");
+                }
                 break;
-            
+
             default:
                 return 1;
-        }
+            }
     }
 
     return 0;
