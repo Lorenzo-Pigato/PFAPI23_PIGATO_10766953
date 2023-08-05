@@ -41,11 +41,11 @@ node_t* get_node (node_t* root, int key){
     }
     else if(root->key < key){
         printf("+ Right branch taken\n");
-        get_node(root->right_child, key);
+        return get_node(root->right_child, key);
     }
     else if(root->key > key){
         printf("+ Left branch taken\n");
-        get_node(root->left_child, key);
+        return get_node(root->left_child, key);
     }
     else{
         printf("+ Node found\n+ Node address: %p\n\n", (void*)root);
@@ -57,15 +57,19 @@ node_t* get_parent (node_t* root, int key){
     if(root != NULL){
         if (root->key == key) return NULL;
         
-        if (root->left_child != NULL)
+        if (root->left_child != NULL){
             if (root->left_child->key == key) return root;
+        }
         
-        if (root->right_child != NULL)
+        if (root->right_child != NULL){
             if (root->right_child->key == key) return root;
+        }
 
-        else if (root->key < key) get_parent(root->right_child, key);
-        else if (root->key > key) get_parent(root->left_child, key);
+        if (root->key < key) return get_parent(root->right_child, key);
+        else if (root->key > key) return get_parent(root->left_child, key);
     }
+
+    return NULL;
 }
 
 void remove_node(node_t* root, int key){
