@@ -24,9 +24,6 @@ typedef struct rb_node {
 
 typedef node_t* node;                                           //Definition of a node as a pointer
 
-//const node_t leaf_s = {-1, black, NULL, NULL, NULL};            //Definition of a NULL LEAF
-//const node_t* const leaf = &leaf_s; 
-
 typedef struct linked_list {                                    //List of nodes in a range
     node node;
     struct linked_list* next;
@@ -193,7 +190,7 @@ void rotate_right (node* root, node parent, node child){
     printf("+ Nodes right-rotated\n\n");
 }
 
-void check_tree(node* root, node target)
+void fix_insertion (node* root, node target)
 {
 
     printf("+ Started violations checking\n");
@@ -291,16 +288,6 @@ void check_tree(node* root, node target)
     (*root)->color = black; // Il nodo radice deve essere sempre nero
 }
 
-    // Uncle node is RED and parent has NO CHILD-> RECOLORING
-    // RECOLORING inverts colors of PARENT - UNCLE - GRANDPA
-    // Must check if other rotations or recoloring is needed ascending to root
-
-    // Uncle node is BLACK -> ROTATION
-    // left heavy -> right rotation
-    // right heavy -> left rotation
-    // left-right sit -> left rotate parent -> right rotate grand parent
-    // right-left sit -> right rotate parent -> left rotate grand parent
-
 void insert_node (node* root, int key){
     //Every new node inserted starts as red except for root
     
@@ -361,8 +348,12 @@ void insert_node (node* root, int key){
         printf("+ Node inserted correctly\n+ Node memory address: %p\n", (void *)(tmp));
         if(parent != NULL) printf ("+ Parent key: %d\n\n", parent->key);
 
-        check_tree(root, *tmp); 
+        fix_insertion (root, *tmp); 
     }
+}
+
+void fix_removal (node* root, node target){
+    
 }
 
 void remove_node (node* root, int key){                         
@@ -377,19 +368,29 @@ void remove_node (node* root, int key){
     // Deleting a leaf-node [1]
 
     if (target->left_child == NULL && target->right_child == NULL){
-        if(target->parent != NULL){                             // Target is not root
+
+        if (target->parent == NULL)                             // Target is root
+        {
+            *root = NULL;
+            free(target);
+            return;
+        }
+
+        else                                                    // Target is not root
+        {
+
             if(target->parent->left_child == target){           // Target is a left child
                 printf("+ Left leaf removed\n");
+
                 target->parent->left_child = NULL;              // Resetting parent's child pointer
             }
             else{                                               // Target is a right child
                 printf("+ Right leaf removed\n");
+                
                 target->parent->right_child = NULL;
             }
         }
-        
-        if(target->color != red) check_tree(root, (target->parent));      // Removing a red leaf implies no violation
-        
+          
         free(target);
         
         return;
@@ -447,7 +448,7 @@ void remove_node (node* root, int key){
 
     free(target);
 
-    check_tree(root, next);                                          // Maintain Red and Black structure
+    fix_removal (root, next);                                   // Maintain Red and Black structure
 }
 
 void delete_tree (node root){
