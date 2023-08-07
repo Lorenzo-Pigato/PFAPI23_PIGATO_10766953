@@ -351,10 +351,19 @@ void insert_node (node* root, int key){
         fix_insertion (root, *tmp); 
     }
 }
-
+/*
 void fix_removal (node* root, node target){
-    
-}
+
+    // Leaf removal
+
+    if(target->left_child == NULL && target->right_child == NULL){
+        if (target->color == black)                             // Red leaves removal does not cause violations
+        {
+            
+        }
+        
+    }
+}*/
 
 void remove_node (node* root, int key){                         
     node target = find_node(*root, key);
@@ -381,16 +390,16 @@ void remove_node (node* root, int key){
 
             if(target->parent->left_child == target){           // Target is a left child
                 printf("+ Left leaf removed\n");
-
                 target->parent->left_child = NULL;              // Resetting parent's child pointer
             }
             else{                                               // Target is a right child
                 printf("+ Right leaf removed\n");
-                
                 target->parent->right_child = NULL;
             }
         }
-          
+        
+        //fix_removal(root, target);
+        
         free(target);
         
         return;
@@ -417,6 +426,9 @@ void remove_node (node* root, int key){
 
         tmp->right_child = target->right_child;
         target->right_child->parent = next;
+        next->color = target->color;                            // Substitute inherits target's color
+
+        //fix_removal(root, next);
     }
 
     else if (next == NULL)                                      // No next element found (left subtree only) [3]
@@ -427,6 +439,7 @@ void remove_node (node* root, int key){
     else if (next == target->right_child)                       // Next node has no left tree -> Next element is target's right child [4]
     {                       
         next->left_child = target->left_child;                  // Acquiring target's left subtree, if any
+        next->left_child->parent = next;
     }
 
     next->parent = target->parent;                              // Acquiring target's parent, if any
@@ -448,7 +461,7 @@ void remove_node (node* root, int key){
 
     free(target);
 
-    fix_removal (root, next);                                   // Maintain Red and Black structure
+    //fix_removal (root, next);                                   // Maintain Red and Black structure
 }
 
 void delete_tree (node root){
@@ -494,9 +507,7 @@ void print_level_order(node root)                               // Remove before
 
 /////////////////////////////////////////////////////
 
-    int
-    main(void)
-{
+int main(void) {
     char inst;                                                  // Char containing instruction to execute
     int key;  
     int range;                                                  
