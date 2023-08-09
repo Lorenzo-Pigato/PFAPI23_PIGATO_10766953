@@ -74,7 +74,7 @@ node prev_node (node root, int key){                            // Grater of lef
             return target;
         }
         else{
-            while (target->parent != NULL && target != NULL)    // Stop when root is found
+            while (target->parent != NULL && target != root)    // Stop when root is found
             {
                 target = target->parent;
                 if (target->key < key)
@@ -138,8 +138,12 @@ node next_node (node root, int key){                            // Smaller of ri
 
 void rotate_left(node* root, node parent, node child){
 
-    if(parent->right_child != child) return;
-    
+    if(parent->right_child != child) 
+    {
+        printf("+ Error occurred, rotation not performed\n");
+        return;
+    }
+
     child->parent = parent->parent;                             // Child parent is now grandparent
     
     if (child->parent != NULL)
@@ -165,8 +169,12 @@ void rotate_left(node* root, node parent, node child){
 
 void rotate_right (node* root, node parent, node child){
 
-    if(parent->left_child != child) return;
-    
+    if(parent->left_child != child) 
+    {
+        printf("+ Error occurred, rotation not performed\n");
+        return;
+    }
+
     child->parent = parent->parent;                             // Child parent is now grandparent
     
     if (child->parent != NULL)
@@ -351,22 +359,154 @@ void insert_node (node* root, int key){
         fix_insertion (root, *tmp); 
     }
 }
-/*
-void fix_removal (node* root, node target){
 
-    // Leaf removal
+color_t get_color(node target){
+    if (target == NULL || target->color == black)
+        return black;
+    else
+        return red;
+}
 
-    if(target->left_child == NULL && target->right_child == NULL){
-        if (target->color == black)                             // Red leaves removal does not cause violations
+void fix_removal(node *root, node target)
+{
+    printf("+ Fixing target: %d\n", target->key);
+
+    node parent = target->parent;
+    node sibling;
+
+    if (target == *root){
+        target->color = black;
+        printf("+ Tree fixed\n\n");
+        return;
+    }
+    else                                                        // Identify sibling
+    {
+        if (parent->left_child == target)                       // Target is left child
+            sibling = parent->right_child;
+        else                                                    // Target is right child
+            sibling = parent->left_child;
+    }
+
+    if (sibling != NULL)
+    {
+
+        printf("\n+ Parent: %s\n", parent->color == red ? "red" : "black");
+        printf("+ Sibling: %s\n", sibling->color == red ? "red" : "black");
+        printf("+ Left: %s\n", sibling->left_child->color == red ? "red" : "black");
+        printf("+ Right: %s\n\n", sibling->right_child->color == red ? "red" : "black");
+
+        // Sibling has both black children
+
+        if ((get_color(sibling->left_child) == black) && (get_color(sibling->right_child) == black))
+        {
+            if(sibling->color == black)                         // Black sibling with black children
+            {
+                if (parent->color == red)                       // Double blackness could be solved pushing up blackness to parent
+                {
+                    printf("+ Case [1]: pushing up blackness to parent\n");
+                    parent->color = black;
+                    sibling->color = red;
+                }
+
+                else                                            // Parent is also black
+                {
+                    printf("+ Case [2]: pushing up blackness to black parent\n");
+                    sibling->color = red;                       // Push blackness up, parent is now double black
+                    fix_removal(root, parent);                  // Fix parent;
+                }
+            }
+            else                                                // Red sibling with black children
+            {
+                if (parent->color == black)                     // Double blackness could be fixed pushing down blackness from parent
+                {
+                    printf("+ Case [3]: pushing down blackness to sibling\n");
+                    parent->color = red;
+                    sibling->color = black;
+
+                    if (parent->left_child == sibling)          // Sibling is left child -> Needed right rotation to balance deletion
+                        rotate_right(root, parent, sibling);
+                    
+                    else
+                        rotate_left(root, parent, sibling);     // Otherwise a left rotation is needed
+                    
+                    fix_removal(root, target);                  // After rotation, check again for double blackness fix up
+                }
+                
+
+            }
+
+        }
+
+        else if (get_color(sibling->left_child) == red)
         {
             
+            // Target is left child, sibling is black and nearest nephew is red
+
+            if (target->parent->left_child == target && sibling->color == black)           
+            {
+                printf("+ Case [4]: pushing down blackness from sibling to nephew\n");
+
+                sibling->right_child->color = black;            // Push down blackness from sibling to nephew
+                rotate_left(root, parent, sibling);
+            }
+
+            // Target is right child, sibling is black and furthest nephew is red
+
+            else if(target->parent->right_child == target && sibling->color == black)
+            {
+                printf("+ Case [5]: switch parent and sibling color, pushing blackness to nephew\n");
+            
+                sibling->left_child->color = black;             // Black pushed to nephew
+                rotate_right(root, parent, sibling);
+            }
+            
+            // In both subcases, color must be switched between parent and sibling
+            
+            color_t tmp = parent->color;
+            parent->color = sibling->color;
+            sibling->color = tmp;
         }
-        
+
+        else if (get_color(sibling->right_child) == red)
+        {
+
+            // Target is right child, sibling is black and nearest nephew is red
+
+            if (target->parent->right_child == target && sibling->color == black)          
+            {
+                printf("+ Case [6]: pushing down blackness from sibling to nephew\n");
+
+                sibling->left_child->color = black;             // Push down blacknes from sibling to nephew
+
+                rotate_right(root, parent, sibling);
+            }
+
+            // Target is left child, sibling is black and furthest nephew is red
+
+            else if (target->parent->left_child == target && sibling->color == black)
+            {
+                printf("+ Case [7]: switch parent and sibling color, pushing blackness to nephew\n");
+
+                sibling->right_child->color = black;            // Black pushed to nephew
+
+                rotate_left(root, parent, sibling);
+            }
+
+            // In both subcases, color must be switched between parent and sibling
+
+            color_t tmp = parent->color;
+            parent->color = sibling->color;
+            sibling->color = tmp;
+        }
     }
-}*/
+
+
+       
+}
 
 void remove_node (node* root, int key){                         
     node target = find_node(*root, key);
+    int key_copy;
 
     if (target == NULL)                                         // Target node not found
     {
@@ -376,8 +516,8 @@ void remove_node (node* root, int key){
 
     // Deleting a leaf-node [1]
 
-    if (target->left_child == NULL && target->right_child == NULL){
-
+    if (target->left_child == NULL && target->right_child == NULL)
+    {
         if (target->parent == NULL)                             // Target is root
         {
             *root = NULL;
@@ -387,19 +527,29 @@ void remove_node (node* root, int key){
 
         else                                                    // Target is not root
         {
+            
+            printf("+ Left reached\n");
+            /////////// Fixing tree before removal ///////////////
 
-            if(target->parent->left_child == target){           // Target is a left child
-                printf("+ Left leaf removed\n");
+            if (target->color == red)                           // Target is a red leaf, no possible violations
+                printf("+ Leaf is red, no violations\n\n");
+
+            else
+            {
+                printf("+ Double blackness violation\n");
+                fix_removal(root, target);
+            }
+            //////////////////////////////////////////////////////
+
+            if(target->parent->left_child == target)            // Target is a left child
                 target->parent->left_child = NULL;              // Resetting parent's child pointer
-            }
-            else{                                               // Target is a right child
-                printf("+ Right leaf removed\n");
+            
+            else                                               // Target is a right child
                 target->parent->right_child = NULL;
-            }
+            
         }
-        
-        //fix_removal(root, target);
-        
+
+        printf("+ Target leaf deleted\n\n");
         free(target);
         
         return;
@@ -407,61 +557,23 @@ void remove_node (node* root, int key){
 
     // Deleting a central node
 
-    node next = next_node(target, key);
-
-    if (target->right_child != next)                            // next node is not target's child and neither an ancestor [2]
+    node next = next_node(target, key);                         // Finde next element only inside subtree
+    
+    if (next != NULL)                                           // Next element found
     {
-        next->left_child = target->left_child;                  // Acquiring target's left child, if any
-        target->left_child->parent = next;
-
-        if(next->parent->left_child == next)                    // Next node's parent child pointer deletion
-            next->parent->left_child = NULL;
-        else
-            next->parent->right_child = NULL;
-
-        node tmp = next;                                        // OPTIMIZABLE -> use next
-
-        while(tmp->right_child != NULL)                         // Find max of right subtree
-            tmp = tmp->right_child;
-
-        tmp->right_child = target->right_child;
-        target->right_child->parent = next;
-        next->color = target->color;                            // Substitute inherits target's color
-
-        //fix_removal(root, next);
+        key_copy = next->key;
+        printf("+ Copied key of next node in order\n");
+        remove_node(root, next->key);
     }
 
-    else if (next == NULL)                                      // No next element found (left subtree only) [3]
+    else                                                        // No next element found (left subtree only) [3]
     {
-        next = target->left_child;
+        key_copy = target->left_child->key;
+        printf("+ Copied key of left child\n");
+        remove_node(root, target->left_child->key);
     }
 
-    else if (next == target->right_child)                       // Next node has no left tree -> Next element is target's right child [4]
-    {                       
-        next->left_child = target->left_child;                  // Acquiring target's left subtree, if any
-        next->left_child->parent = next;
-    }
-
-    next->parent = target->parent;                              // Acquiring target's parent, if any
-    if (target->parent != NULL)
-    {
-        if (target->parent->left_child == target)               // Changing parent's child pointer to new node
-            target->parent->left_child = next;
-        else
-            target->parent->right_child = next;
-    }
-    else
-    {                                                           // Must change root reference
-        *root = next;
-        (*root)->parent = NULL;
-        printf("+ New root key: %d\n", (*root)->key);
-    }
-
-    printf("+ Target Node deleted\n\n");
-
-    free(target);
-
-    //fix_removal (root, next);                                   // Maintain Red and Black structure
+    target->key = key_copy;                                     // Substituting target node's infos with next node's infos (deleted, so copied)
 }
 
 void delete_tree (node root){
@@ -509,8 +621,7 @@ void print_level_order(node root)                               // Remove before
 
 int main(void) {
     char inst;                                                  // Char containing instruction to execute
-    int key;  
-    int range;                                                  
+    int key;                                                   
     node root = NULL;                                           // Inizialize NULL root pointer
 
     insert_node(&root, 15);
@@ -534,7 +645,7 @@ int main(void) {
     insert_node(&root, 19);
     insert_node(&root, 20);
 
-    printf("Instruction list:\n> i - insert\n> r - remove\n> f - find\n> g - graph\n> q - quit\n\n");
+    printf("Instruction list:\n> i - insert\n> r - remove\n> f - find\n> n - next-to\n> p - print\n> q - quit\n\n");
 
     while (1)
     {
@@ -561,17 +672,14 @@ int main(void) {
             find_node(root, key);
             break;
 
-        case 'g':
-            scanf(" %d", &range);
-            printf("\n+ Creating reachability graph for node - key: %d - range: %d\n", key, range);
+        case 'n':
+            printf("\n+ Finding nodes next to - key: %d\n", key);
             next_node(root, key);
             prev_node(root, key);
-            //list lst = get_nodes_in_range(root, key, range);
             break;
 
         case 'p':
             print_level_order(root);
-            // list lst = get_nodes_in_range(root, key, range);
             break;
 
         case 'q':
