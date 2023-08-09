@@ -392,8 +392,8 @@ void fix_removal(node *root, node target)
 
         printf("\n+ Parent: %s\n", parent->color == red ? "red" : "black");
         printf("+ Sibling: %s\n", sibling->color == red ? "red" : "black");
-        printf("+ Left: %s\n", sibling->left_child->color == red ? "red" : "black");
-        printf("+ Right: %s\n\n", sibling->right_child->color == red ? "red" : "black");
+        printf("+ Left: %s\n", get_color(sibling->left_child) == red ? "red" : "black");
+        printf("+ Right: %s\n\n", get_color(sibling->right_child) == red ? "red" : "black");
 
         // Sibling has both black children
 
@@ -528,7 +528,7 @@ void remove_node (node* root, int key){
         else                                                    // Target is not root
         {
             
-            printf("+ Left reached\n");
+            printf("+ Leaf reached\n");
             /////////// Fixing tree before removal ///////////////
 
             if (target->color == red)                           // Target is a red leaf, no possible violations
@@ -644,7 +644,7 @@ int main(void) {
     insert_node(&root, 16);
     insert_node(&root, 19);
     insert_node(&root, 20);
-
+    
     printf("Instruction list:\n> i - insert\n> r - remove\n> f - find\n> n - next-to\n> p - print\n> q - quit\n\n");
 
     while (1)
