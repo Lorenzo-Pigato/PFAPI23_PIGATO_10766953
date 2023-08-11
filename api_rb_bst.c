@@ -446,7 +446,9 @@ void fix_removal(node *root, node target)
             {
                 printf("+ Case [4]: pushing down blackness from sibling to nephew\n");
 
-                sibling->right_child->color = black;            // Push down blackness from sibling to nephew
+                if(sibling->right_child)
+                    sibling->right_child->color = black;        // Push down blackness from sibling to nephew
+
                 rotate_left(root, parent, sibling);
             }
 
@@ -455,8 +457,8 @@ void fix_removal(node *root, node target)
             else if(target->parent->right_child == target && sibling->color == black)
             {
                 printf("+ Case [5]: switch parent and sibling color, pushing blackness to nephew\n");
-            
-                sibling->left_child->color = black;             // Black pushed to nephew
+                 
+                sibling->left_child->color = black;             // Black pushed to nephew - this node exists due to its color
                 rotate_right(root, parent, sibling);
             }
             
@@ -475,8 +477,9 @@ void fix_removal(node *root, node target)
             if (target->parent->right_child == target && sibling->color == black)          
             {
                 printf("+ Case [6]: pushing down blackness from sibling to nephew\n");
-
-                sibling->left_child->color = black;             // Push down blacknes from sibling to nephew
+                
+                if(sibling->left_child)
+                    sibling->left_child->color = black;         // Push down blacknes from sibling to nephew
 
                 rotate_right(root, parent, sibling);
             }
@@ -487,7 +490,7 @@ void fix_removal(node *root, node target)
             {
                 printf("+ Case [7]: switch parent and sibling color, pushing blackness to nephew\n");
 
-                sibling->right_child->color = black;            // Black pushed to nephew
+                sibling->right_child->color = black;            // Black pushed to nephew - this node exists because due to its color
 
                 rotate_left(root, parent, sibling);
             }
@@ -624,6 +627,7 @@ int main(void) {
     int key;                                                   
     node root = NULL;                                           // Inizialize NULL root pointer
 
+    /*
     insert_node(&root, 15);
     insert_node(&root, 13);
     insert_node(&root, 6);
@@ -644,6 +648,7 @@ int main(void) {
     insert_node(&root, 16);
     insert_node(&root, 19);
     insert_node(&root, 20);
+    */
     
     printf("Instruction list:\n> i - insert\n> r - remove\n> f - find\n> n - next-to\n> p - print\n> q - quit\n\n");
 
