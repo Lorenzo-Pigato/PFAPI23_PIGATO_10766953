@@ -536,6 +536,32 @@ bool remove_node (node* root, int key){
     return true;
 }
 
+void print_level_order(node root) // Remove before flight - Utility
+{
+    if (root == NULL)
+    {
+        printf("+ Empty tree\n\n");
+        return;
+    }
+
+    node queue[1000];
+    int front = 0, rear = 0;
+    queue[rear++] = root;
+
+    while (front < rear)
+    {
+        node current = queue[front++];
+        printf("Key: %d Color: %s Parent: %d\n", current->key, current->color == red ? "red" : "black", current->parent != NULL ? current->parent->key : -1);
+
+        if (current->left_child)
+            queue[rear++] = current->left_child;
+        if (current->right_child)
+            queue[rear++] = current->right_child;
+    }
+
+    printf("\n");
+}
+
 /////////////////////////////////////////////////////
 
 int main()
