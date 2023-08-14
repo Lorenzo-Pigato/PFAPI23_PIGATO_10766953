@@ -398,10 +398,17 @@ void fix_removal(node *root, node target)
 
             if (target->parent->left_child == target && sibling->color == black)           
             {
-                if(sibling->right_child) 
+                if (sibling->right_child == NULL)
+                {
+                    parent->color = black;
+                    rotate_right(root, sibling, sibling->left_child);
+                    rotate_left(root, parent, parent->right_child);
+                }
+                else
+                {
                     sibling->right_child->color = black;         // Push down blackness from sibling to nephew
-                
-                rotate_left(root, parent, sibling);
+                    rotate_left(root, parent, sibling);
+                }
             }
 
             // Target is right child, sibling is black and furthest nephew is red
@@ -428,10 +435,17 @@ void fix_removal(node *root, node target)
 
             if (target->parent->right_child == target && sibling->color == black)          
             {
-                if(sibling->left_child)
+                if(sibling->left_child == NULL)
+                {
+                    parent->color = black;
+                    rotate_left(root, sibling, sibling->right_child);
+                    rotate_right(root, parent, parent->left_child);
+                }
+                else
+                {                
                     sibling->left_child->color = black;             // Push down blacknes from sibling to nephew
-
-                rotate_right(root, parent, sibling);
+                    rotate_right(root, parent, sibling);
+                }
             }
 
             // Target is left child, sibling is black and furthest nephew is red
@@ -536,7 +550,7 @@ bool remove_node (node* root, int key){
     return true;
 }
 
-void print_level_order(node root) // Remove before flight - Utility
+void print_level_order(node root)                               // Remove before flight - Utility
 {
     if (root == NULL)
     {
@@ -544,14 +558,14 @@ void print_level_order(node root) // Remove before flight - Utility
         return;
     }
 
-    node queue[1000];
+    node queue[1000000];
     int front = 0, rear = 0;
     queue[rear++] = root;
 
     while (front < rear)
     {
         node current = queue[front++];
-        printf("Key: %d Color: %s Parent: %d\n", current->key, current->color == red ? "red" : "black", current->parent != NULL ? current->parent->key : -1);
+        printf("{'Key' : %d, 'Color' : '%s', 'Parent' : %d},\n", current->key, current->color == red ? "red" : "black", current->parent != NULL ? current->parent->key : -1);
 
         if (current->left_child)
             queue[rear++] = current->left_child;
@@ -615,6 +629,8 @@ int main()
                     
                 }
                 else return 1;
+
+                print_level_order(stations);
             }
 
             ////////////////// Add a car //////////////////
@@ -649,6 +665,8 @@ int main()
                 else
                     printf("non demolita\n");
             }
+
+            print_level_order(stations);
 
             break;
 
@@ -686,6 +704,11 @@ int main()
             return 1;
         }
     }
+
+    remove_node(&stations, 978114036);
+
+    // 499379011
+    print_level_order(stations);
 
     stations = delete_tree(stations);
 
