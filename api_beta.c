@@ -563,7 +563,7 @@ void find_path(path_node* list, int size)
     for (int crnt = 0; crnt < size -1; crnt++)
     {
         int next = crnt + 1;
-
+        
         while(next < size && (list[next].station->key) - (list[crnt].station->key) <= list[crnt].station->range)
         {
 
@@ -582,28 +582,28 @@ void find_path(path_node* list, int size)
         }
     }
 
-    if(list[size-1].link == NULL)
-    {
-        printf("nessun percorso\n");
-        return;
-    }
-
-    int path_size = list[size -1].clicks;
+    int path_size = (list[size -1].clicks) + 1;                         // Path size must be the number of clicks of destination node
     int path [path_size];
 
-    path_node sttn = list[size -1];
+    path_node tmp = list[size -1];
     
     for (int i = path_size - 1; i >= 0; i--)
     {
-        path[i] = sttn.station->key;
-        sttn = *(sttn.link);
+        path[i] = tmp.station->key;
+        if(tmp.link)
+            tmp = *(tmp.link);
     }
 
-    printf("%d ", list[0].station->key);
-    for (int i = 0; i < path_size; i++)
-        printf("%d ", path[i]);
+    if (path[0] == list[0].station->key)
+    {
+        for (int i = 0; i < path_size; i++)
+            printf("%d ", path[i]);
+        printf("\n");   
+    }
 
-    printf("\n");   
+    else
+        printf("nessun percorso\n");
+
 }
 
 void print_level_order(node root)                               // Remove before flight - Utility
