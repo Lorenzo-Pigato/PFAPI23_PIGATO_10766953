@@ -30,6 +30,14 @@ typedef struct rb_node {
 
 typedef node_t* node;                                           //Definition of a node as a pointer
 
+typedef struct path_s
+{
+    node station;
+    
+    int clicks;                                                 // Distance from origin
+    struct path_s* link;                                        // Best connection for path
+} path_node;
+
 /////////////////////////////////////////////////////
 
 /////////////////// Functions ///////////////////////
@@ -550,6 +558,54 @@ bool remove_node (node* root, int key){
     return true;
 }
 
+void find_path(path_node* list, int size)
+{
+    for (int crnt = 0; crnt < size -1; crnt++)
+    {
+        int next = crnt + 1;
+
+        while(next < size && (list[next].station->key) - (list[crnt].station->key) <= list[crnt].station->range)
+        {
+
+            if(list[next].link == NULL)                                 // If theree is no link
+            {
+                list[next].link = &list[crnt];                           // Add new link
+                list[next].clicks = list[crnt].clicks + 1;
+            }
+            else if(list[next].clicks > (list[crnt].clicks + 1))        // If in-range station's clicks are more than current station's clicks + 1 (new step)
+            {   
+                list[next].link = &list[crnt];                          // Update link
+                list[next].clicks = list[crnt].clicks + 1;
+            }
+
+            next++;
+        }
+    }
+
+    if(list[size-1].link == NULL)
+    {
+        printf("nessun percorso\n");
+        return;
+    }
+
+    int path_size = list[size -1].clicks;
+    int path [path_size];
+
+    path_node sttn = list[size -1];
+    
+    for (int i = path_size - 1; i >= 0; i--)
+    {
+        path[i] = sttn.station->key;
+        sttn = *(sttn.link);
+    }
+
+    printf("%d ", list[0].station->key);
+    for (int i = 0; i < path_size; i++)
+        printf("%d ", path[i]);
+
+    printf("\n");   
+}
+
 void print_level_order(node root)                               // Remove before flight - Utility
 {
     if (root == NULL)
@@ -613,7 +669,13 @@ int main()
                         for (i = 0; i < input[1]; i++)
                         {
                             if (!scanf("%d", &tmp_int)) return 1;
-                            else insert_node(&(tmp_node->cars), tmp_int, true);
+                            else
+                            {
+                                insert_node(&(tmp_node->cars), tmp_int, true);
+                                
+                                if(tmp_int > tmp_node->range)   // If new car has greater range
+                                    tmp_node->range = tmp_int;
+                            }
                         }
                         printf("aggiunta\n");
                     }
@@ -630,7 +692,7 @@ int main()
                 }
                 else return 1;
 
-                print_level_order(stations);
+                //print_level_order(stations);
             }
 
             ////////////////// Add a car //////////////////
@@ -645,6 +707,9 @@ int main()
                 {
                     insert_node(&(tmp_node->cars), input[1], true);
                     printf("aggiunta\n");
+
+                    if(input[1] > tmp_node->range)              // If new car has greater range
+                        tmp_node->range = input[1];
                 }
                 else
                     printf("non aggiunta\n");
@@ -666,7 +731,7 @@ int main()
                     printf("non demolita\n");
             }
 
-            print_level_order(stations);
+            //print_level_order(stations);
 
             break;
 
@@ -677,6 +742,11 @@ int main()
 
                 if (tmp_node)
                 {
+                    node tmp_car = find_node(tmp_node->cars, input[1]);
+
+                    if(tmp_car && tmp_car->copies == 0 && tmp_node->range == tmp_car->key)
+                        tmp_node->range = prev_node(tmp_node->cars, tmp_car->key)->key;
+
                     tmp_bool = remove_node(&(tmp_node->cars), input[1]);
                     
                     if (tmp_bool == true)
@@ -692,9 +762,37 @@ int main()
         case 'p':
             if (scanf(" %d %d", &input[0], &input[1]))
             {
-                if (find_node(stations, input[0]) && find_node(stations, input[1]))
-                    printf("pianifica\n");
+                node start = find_node (stations, input[0]);
+                node stop = find_node (stations, input[1]);
 
+                node next = start;
+                int size = 1;
+
+                if (start && stop)
+                {
+                    while (next != stop)
+                    {
+                        next = next_node(stations, next->key);
+                        size++;
+                    }
+
+                    path_node* list = (path_node*) malloc(size * sizeof(path_node));
+
+                    next = start;
+
+                    for (int i = 0; i < size; i++)
+                    {
+                        list[i].station = next;
+                        list[i].clicks = 0;
+                        list[i].link = NULL;
+                        next = next_node(stations, next->key);
+                    }
+
+                    find_path(list, size);
+
+                    free(list);
+                }
+            
                 else
                     printf("nessun percorso\n");
             }
@@ -708,7 +806,7 @@ int main()
     remove_node(&stations, 978114036);
 
     // 499379011
-    print_level_order(stations);
+    //print_level_order(stations);
 
     stations = delete_tree(stations);
 
