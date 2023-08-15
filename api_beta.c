@@ -563,8 +563,9 @@ void find_path(path_node* list, int size)
     for (int crnt = 0; crnt < size -1; crnt++)
     {
         int next = crnt + 1;
-        
-        while(next < size && (list[next].station->key) - (list[crnt].station->key) <= list[crnt].station->range)
+        int dist = (list[next].station->key) - (list[crnt].station->key);
+
+        while (next < size && dist * (dist > 0 ? 1 : -1) <= list[crnt].station->range)
         {
 
             if(list[next].link == NULL)                                 // If theree is no link
@@ -575,10 +576,17 @@ void find_path(path_node* list, int size)
             else if(list[next].clicks > (list[crnt].clicks + 1))        // If in-range station's clicks are more than current station's clicks + 1 (new step)
             {   
                 list[next].link = &list[crnt];                          // Update link
-                list[next].clicks = list[crnt].clicks + 1;
+                list[next].clicks = list[crnt].clicks + 1;              // Update clicks
+            }
+            else if (list[next].clicks >= (list[crnt].clicks + 1) && list[0].station->key > list[1].station->key)
+            {
+                list[next].link = &list[crnt];                          // Update link
             }
 
             next++;
+            
+            if(next < size)
+                dist = (list[next].station->key) - (list[crnt].station->key);
         }
     }
 
@@ -596,9 +604,10 @@ void find_path(path_node* list, int size)
 
     if (path[0] == list[0].station->key)
     {
-        for (int i = 0; i < path_size; i++)
+        for (int i = 0; i < path_size - 1; i++)
             printf("%d ", path[i]);
-        printf("\n");   
+
+        printf ("%d\n", path[path_size - 1]);                                        // For matching whitespaces   
     }
 
     else
@@ -645,13 +654,15 @@ int main()
     int tmp_int;
     bool tmp_bool;
 
+    int i = 0;
+
     while (scanf(" %s", buffer) == 1 && !feof(stdin))
     {                                                           // Data collected, no EOF
         switch (buffer[0])
         {
         case 'a':
-
-            int i = 0;
+            
+            i = 0;
             while (buffer[i] != '-')
                 i++;
 
@@ -683,8 +694,8 @@ int main()
                         printf("aggiunta\n");
                     else if(!tmp_node && input[1] != 0)
                     {
-                        for (int i = 0; i < input[1]; i++)
-                            scanf("%d", &tmp_int);
+                        for (i = 0; i < input[1]; i++)
+                            if(!scanf("%d", &tmp_int)) return 1;
                         
                         printf("non aggiunta\n");
                     }
@@ -772,7 +783,11 @@ int main()
                 {
                     while (next != stop)
                     {
-                        next = next_node(stations, next->key);
+                        if(start->key < stop->key)
+                            next = next_node(stations, next->key);
+                        else
+                            next = prev_node(stations, next->key);
+
                         size++;
                     }
 
@@ -785,7 +800,11 @@ int main()
                         list[i].station = next;
                         list[i].clicks = 0;
                         list[i].link = NULL;
-                        next = next_node(stations, next->key);
+
+                        if (start->key < stop->key)
+                            next = next_node(stations, next->key);
+                        else
+                            next = prev_node(stations, next->key);
                     }
 
                     find_path(list, size);
