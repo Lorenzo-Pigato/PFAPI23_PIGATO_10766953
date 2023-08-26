@@ -432,7 +432,9 @@ int main()
                     node tmp_car = find_node(tmp_node->cars, input[1]);
 
                     if(tmp_car && tmp_car->copies == 0 && tmp_node->range == tmp_car->key)
-                        tmp_node->range = prev_node(tmp_node->cars, tmp_car->key)->key;
+                    {
+                        tmp_node->range = prev_node(tmp_node->cars, tmp_car->key) != NULL ? prev_node(tmp_node->cars, tmp_car->key)->key : 0;
+                    }
 
                     tmp_bool = remove_node(&(tmp_node->cars), input[1]);
                     
@@ -500,11 +502,6 @@ int main()
             return 1;
         }
     }
-
-    remove_node(&stations, 978114036);
-
-    // 499379011
-    //print_level_order(stations);
 
     stations = delete_tree(stations);
 
