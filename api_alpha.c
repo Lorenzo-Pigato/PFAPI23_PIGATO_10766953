@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #define BUFF_SIZE 20
-#define INPUT_SIZE 2 // Station_id   Car_Number  512 cars
+#define INPUT_SIZE 2
 
 /////////////////// Types definition ////////////////
 
