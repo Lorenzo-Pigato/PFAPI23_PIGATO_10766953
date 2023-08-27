@@ -238,7 +238,7 @@ bool remove_node (node* root, int key){
 
     node next = next_node(target, key);                         // Finde next element only inside subtree
     
-    if(next == NULL)                                            // No next element found (left subtree only) [3] _****** CHECK HERE
+    if(next == NULL)                                            // No next element found (left subtree only) [3]
         next = prev_node(target, key);
   
     key_copy = next->key;
@@ -378,8 +378,6 @@ int main()
                     
                 }
                 else return 1;
-
-                //print_level_order(stations);
             }
 
             ////////////////// Add a car //////////////////
@@ -417,9 +415,6 @@ int main()
                 else
                     printf("non demolita\n");
             }
-
-            //print_level_order(stations);
-
             break;
 
         case 'r':
