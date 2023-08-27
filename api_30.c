@@ -7,7 +7,6 @@
 /////////////////// Types definition ////////////////
 
 typedef enum { false, true} bool;
-typedef enum { red, black } color_t;
 
 typedef struct rb_node {
 
@@ -18,8 +17,6 @@ typedef struct rb_node {
     int copies;
     
     // Attributes
-
-    color_t color;
     
     struct rb_node* left_child;
     struct rb_node* right_child;
@@ -170,16 +167,12 @@ node insert_node (node* root, int key, bool is_car){
     if ((*tmp) == (*root))
     {
         new_node->parent = NULL;
-        new_node->color = black;
-        
         *root = new_node;
     }
 
     else
     {
         new_node->parent = parent;
-        new_node->color = red;
-        
         *tmp = new_node;
     }
 
