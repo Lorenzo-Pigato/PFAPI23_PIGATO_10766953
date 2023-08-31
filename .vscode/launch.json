@@ -35,7 +35,7 @@
             "program": "${workspaceFolder}/${fileBasenameNoExtension}",
             "args": [
                 "<",
-                "/home/lorenzo/Documents/Code/API/tests/cutted.txt"
+                "/home/lorenzo/Documents/Code/API-Dev/tests/cutted.txt"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
