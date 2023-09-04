@@ -6,15 +6,10 @@
 
 /////////////////// Types definition ////////////////
 
-typedef enum
-{
-    false,
-    true
-} bool;
+typedef enum { false, true } bool;
 
 typedef struct rb_node
 {
-
     // Data section
 
     int key;
@@ -30,14 +25,14 @@ typedef struct rb_node
     struct rb_node *cars;
 } node_t;
 
-typedef node_t *node; // Definition of a node as a pointer
+typedef node_t *node;                                               // Definition of a node as a pointer
 
 typedef struct path_s
 {
     node station;
 
-    int clicks;          // Distance from origin
-    struct path_s *link; // Best connection for path
+    int clicks;                                                     // Distance from origin
+    struct path_s *link;                                            // Best connection for path
 
     struct path_s *next;
 } path_node;
@@ -67,12 +62,12 @@ node find_node(node root, int key)
 
 node prev_node(node root, int key)
 {
-    node target = find_node(root, key); // Find target node
+    node target = find_node(root, key);                             // Find target node
 
     if (target == NULL)
-        return NULL; // No nodes found
+        return NULL;                                                // No nodes found
 
-    if (target->left_child != NULL) // Previous node is gratest of left subtree
+    if (target->left_child != NULL)                                 // Previous node is gratest of left subtree
     {
         target = target->left_child;
 
@@ -82,7 +77,7 @@ node prev_node(node root, int key)
         return target;
     }
 
-    while (target != root) // No left subtree, upper nodes until root
+    while (target != root)                                          // No left subtree, upper nodes until root
     {
         target = target->parent;
         if (target->key < key)
@@ -97,9 +92,9 @@ node next_node(node root, int key)
     node target = find_node(root, key);
 
     if (target == NULL)
-        return NULL; // Node not found
+        return NULL;                                                // Node not found
 
-    if (target->right_child != NULL) // Next node is smallest of right subtree
+    if (target->right_child != NULL)                                // Next node is smallest of right subtree
     {
         target = target->right_child;
 
@@ -109,14 +104,14 @@ node next_node(node root, int key)
         return target;
     }
 
-    while (target != root) // No right subtree, stop searching when arrived to root
+    while (target != root)                                          // No right subtree, stop searching when arrived to root
     {
         target = target->parent;
         if (target->key > key)
             return target;
     }
 
-    return NULL; // No next node found
+    return NULL;                                                    // No next node found
 }
 
 node delete_tree(node root)
@@ -131,7 +126,7 @@ node delete_tree(node root)
 
         root->cars = delete_tree(root->cars);
 
-        free(root); // Free root
+        free(root);                                                 // Free root
     }
 
     return NULL;
@@ -155,7 +150,7 @@ node insert_node(node *root, int key, bool is_car)
         else if (key < (*tmp)->key)
             tmp = &((*tmp)->left_child);
 
-        else if (is_car == true) // If the node is a car and node is already present, increase copies value
+        else if (is_car == true)                                    // If the node is a car and node is already present, increase copies value
         {
             (*tmp)->copies += 1;
             return (*tmp);
@@ -198,10 +193,10 @@ bool remove_node(node *root, int key)
     int copies_copy;
     node cars_ptr_copy = NULL;
 
-    if (target == NULL) // Target node not found
+    if (target == NULL)                                             // Target node not found
         return false;
 
-    if (target->copies > 0) // If there are copies, decrement
+    if (target->copies > 0)                                         // If there are copies, decrement
     {
         target->copies -= 1;
         return true;
@@ -211,7 +206,7 @@ bool remove_node(node *root, int key)
 
     if (target->left_child == NULL && target->right_child == NULL)
     {
-        if (target == *root) // Target is root
+        if (target == *root)                                        // Target is root
         {
             target->cars = delete_tree(target->cars);
 
@@ -220,12 +215,12 @@ bool remove_node(node *root, int key)
             return true;
         }
 
-        else // Target is not root
+        else                                                        // Target is not root
         {
-            if (target->parent->left_child == target) // Target is a left child
-                target->parent->left_child = NULL;    // Resetting parent's child pointer
+            if (target->parent->left_child == target)               // Target is a left child
+                target->parent->left_child = NULL;                  // Resetting parent's child pointer
 
-            else // Target is a right child
+            else                                                    // Target is a right child
                 target->parent->right_child = NULL;
         }
 
@@ -238,9 +233,9 @@ bool remove_node(node *root, int key)
 
     // Deleting a central node
 
-    node next = next_node(target, key); // Finde next element only inside subtree
+    node next = next_node(target, key);                             // Finde next element only inside subtree
 
-    if (next == NULL) // No next element found (left subtree only) [3]
+    if (next == NULL)                                               // No next element found (left subtree only) [3]
         next = prev_node(target, key);
 
     key_copy = next->key;
@@ -249,11 +244,11 @@ bool remove_node(node *root, int key)
     cars_ptr_copy = next->cars;
 
     if (target->cars)
-        next->cars = target->cars; // Exchange car park, so can be deleted when a leaf is found
+        next->cars = target->cars;                                  // Exchange car park, so can be deleted when a leaf is found
 
     remove_node(root, next->key);
 
-    target->key = key_copy; // Substituting target node's infos with next node's infos (deleted, so copied)
+    target->key = key_copy;                                         // Substituting target node's infos with next node's infos (deleted, so copied)
     target->range = range_copy;
     target->cars = cars_ptr_copy;
     target->copies = copies_copy;
@@ -273,19 +268,19 @@ void find_path(path_node *list)
         while (next != NULL && dist * (dist > 0 ? 1 : -1) <= cur->station->range)
         {
 
-            if (next->link == NULL) // If there is no link
+            if (next->link == NULL)                                 // If there is no link
             {
-                next->link = cur; // Add new link
+                next->link = cur;                                   // Add new link
                 next->clicks = cur->clicks + 1;
             }
-            else if (next->clicks > (cur->clicks + 1)) // If in-range station's clicks are more than current station's clicks + 1 (new step)
+            else if (next->clicks > (cur->clicks + 1))              // If in-range station's clicks are more than current station's clicks + 1 (new step)
             {
-                next->link = cur;               // Update link
-                next->clicks = cur->clicks + 1; // Update clicks
+                next->link = cur;                                   // Update link
+                next->clicks = cur->clicks + 1;                     // Update clicks
             }
             else if (next->clicks >= (cur->clicks + 1) && (list->station->key > list->next->station->key))
             {
-                next->link = cur; // Update link
+                next->link = cur;                                   // Update link
             }
 
             next = next->next;
@@ -297,7 +292,7 @@ void find_path(path_node *list)
         cur = cur->next;
     }
 
-    int path_size = cur->clicks + 1; // Path size must be the number of clicks of destination node
+    int path_size = cur->clicks + 1;                                // Path size must be the number of clicks of destination node
     int path[path_size];
 
     path_node tmp = *cur;
@@ -314,7 +309,7 @@ void find_path(path_node *list)
         for (int i = 0; i < path_size - 1; i++)
             printf("%d ", path[i]);
 
-        printf("%d\n", path[path_size - 1]); // For matching whitespaces
+        printf("%d\n", path[path_size - 1]);                        // For matching whitespaces
     }
 
     else
@@ -339,7 +334,7 @@ int main()
     int i = 0;
 
     while (scanf(" %s", buffer) == 1 && !feof(stdin))
-    { // Data collected, no EOF
+    {   // Data collected, no EOF
         switch (buffer[0])
         {
         case 'a':
@@ -367,7 +362,7 @@ int main()
                             {
                                 insert_node(&(tmp_node->cars), tmp_int, true);
 
-                                if (tmp_int > tmp_node->range) // If new car has greater range
+                                if (tmp_int > tmp_node->range)      // If new car has greater range
                                     tmp_node->range = tmp_int;
                             }
                         }
@@ -408,7 +403,7 @@ int main()
                     insert_node(&(tmp_node->cars), input[1], true);
                     printf("aggiunta\n");
 
-                    if (input[1] > tmp_node->range) // If new car has greater range
+                    if (input[1] > tmp_node->range)                 // If new car has greater range
                         tmp_node->range = input[1];
                 }
                 else
@@ -416,7 +411,7 @@ int main()
             }
             break;
 
-            ///////// Remove a station /////////
+        ///////// Remove a station /////////
 
         case 'd':
 
@@ -432,6 +427,8 @@ int main()
             }
             break;
 
+        /////////// Remove a car ///////////
+        
         case 'r':
             if (scanf(" %d %d", &input[0], &input[1]))
             {
