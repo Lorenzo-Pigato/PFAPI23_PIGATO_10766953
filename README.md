@@ -1,4 +1,4 @@
-# Final Project for the Algorithm and Data Structures course @ Polimi (2023-2024)
+# Final Project for the Algorithm and Data Structures course @ Polimi (2022-2023)
 
 ## Overview
 
